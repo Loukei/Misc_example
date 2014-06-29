@@ -91,5 +91,8 @@
     <None Include="input\voxdata32-earth.json">
       <Filter>input</Filter>
     </None>
+    <None Include="output\cubic_voxel.json">
+      <Filter>output</Filter>
+    </None>
   </ItemGroup>
 </Project>
