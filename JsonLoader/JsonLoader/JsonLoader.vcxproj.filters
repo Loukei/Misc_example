@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="原始程式檔">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="標頭檔">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="資源檔">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="jsoncons">
+      <UniqueIdentifier>{047ee57d-e0f3-4796-a34e-3b784f0cf667}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input">
+      <UniqueIdentifier>{bb1a4b3e-dcc3-4915-8160-8c05e5c3d0d3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\error_handler.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json_deserializer.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json_exception.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json_filter.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json_input_handler.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json_output_handler.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json_reader.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json_serializer.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json_structures.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json1.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\json2.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\jsoncons.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\jsoncons_config.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncons\output_format.hpp">
+      <Filter>jsoncons</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonLoader.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="input\voxdata32-earth.json">
+      <Filter>input</Filter>
+    </None>
+  </ItemGroup>
+</Project>
