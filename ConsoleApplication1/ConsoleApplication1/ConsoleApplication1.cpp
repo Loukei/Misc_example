@@ -259,8 +259,8 @@ void Draw_model(void){
 
 	glVertexPointer(3, GL_FLOAT, 0, &vertex_list[0]);
 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, &color_list[0]);
-	glDrawElements(GL_QUADS, index_list.size(), GL_UNSIGNED_INT, &index_list[0]); // 6*4 calls for glvertex
-
+	// each face have 4 calls for glvertex
+	glDrawElements(GL_QUADS, index_list.size(), GL_UNSIGNED_INT, &index_list[0]); 
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_BACK);
