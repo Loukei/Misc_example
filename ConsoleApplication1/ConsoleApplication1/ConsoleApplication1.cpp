@@ -186,12 +186,12 @@ void Loadmodel(void){
 			vector<int> voxel_id = voxel["Position"].as<std::vector<int>>();
 
 			GLfloat x_max, x_min, y_max, y_min, z_max, z_min;
-			x_max = voxel_id[0] * vox_size[0];
-			x_min = (voxel_id[0] + 1)*vox_size[0];
-			y_max = voxel_id[1] * vox_size[1];
-			y_min = (voxel_id[1] + 1)*vox_size[1];
-			z_max = voxel_id[2] * vox_size[2];
-			z_min = (voxel_id[2] + 1)*vox_size[2];
+			x_min = voxel_id[0] * vox_size[0];
+			x_max = (voxel_id[0] + 1) * vox_size[0];
+			y_min = voxel_id[1] * vox_size[1];
+			y_max = (voxel_id[1] + 1) * vox_size[1];
+			z_min = voxel_id[2] * vox_size[2];
+			z_max = (voxel_id[2] + 1) * vox_size[2];
 
 			GLfloat voxel_vertex_list[24] = {
 				x_min, y_min, z_min,	//v0
@@ -201,7 +201,7 @@ void Loadmodel(void){
 				x_min, y_min, z_max,	//v4
 				x_max, y_min, z_max,	//v5
 				x_min, y_max, z_max,	//v6
-				x_min, y_max, z_max,	//v7
+				x_max, y_max, z_max,	//v7
 			};
 
 			GLubyte voxel_color_list[32] = {
@@ -216,12 +216,12 @@ void Loadmodel(void){
 			};
 
 			GLuint voxel_index_list[24] = {
-				num_v + 6, num_v + 2, num_v + 3, num_v + 7,	//front
-				num_v + 4, num_v + 5, num_v + 1, num_v + 0, //end
-				num_v + 4, num_v + 0, num_v + 2, num_v + 6, //left
-				num_v + 7, num_v + 3, num_v + 1, num_v + 5, //right
-				num_v + 4, num_v + 6, num_v + 7, num_v + 5, //top
-				num_v + 0, num_v + 1, num_v + 3, num_v + 2, //down
+				num_v + 6, num_v + 7, num_v + 3, num_v + 2,	//front
+				num_v + 4, num_v + 0, num_v + 1, num_v + 5, //end
+				num_v + 4, num_v + 6, num_v + 2, num_v + 0, //left
+				num_v + 7, num_v + 5, num_v + 1, num_v + 3, //right
+				num_v + 4, num_v + 5, num_v + 7, num_v + 6, //top
+				num_v + 0, num_v + 2, num_v + 3, num_v + 1, //down
 			};
 
 			vertex_list.insert(vertex_list.end(), voxel_vertex_list, voxel_vertex_list + 24);
@@ -261,6 +261,7 @@ void Draw_model(void){
 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, &color_list[0]);
 	// each face have 4 calls for glvertex
 	glDrawElements(GL_QUADS, index_list.size(), GL_UNSIGNED_INT, &index_list[0]); 
+
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_BACK);
