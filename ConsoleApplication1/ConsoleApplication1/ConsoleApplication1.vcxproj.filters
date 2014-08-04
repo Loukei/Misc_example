@@ -19,6 +19,9 @@
     <Filter Include="jsoncons">
       <UniqueIdentifier>{16e4d681-1325-4a9b-8f4a-54afae5dbb64}</UniqueIdentifier>
     </Filter>
+    <Filter Include="trackball">
+      <UniqueIdentifier>{a9f6159b-89d3-4840-8d68-62fdacdea6fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -75,12 +78,21 @@
     <ClInclude Include="jsoncons\output_format.hpp">
       <Filter>jsoncons</Filter>
     </ClInclude>
+    <ClInclude Include="trackball.h">
+      <Filter>trackball</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
     <ClCompile Include="ConsoleApplication1.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="trackball.cpp">
+      <Filter>trackball</Filter>
+    </ClCompile>
+    <ClCompile Include="globals.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
   </ItemGroup>

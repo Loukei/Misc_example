@@ -8,6 +8,7 @@
 #include < vector >
 #include "GL/freeglut.h"
 #include "jsoncons/json.hpp"
+#include "trackball.h"
 
 ////////////////////////////////////////
 // Global variables
@@ -20,14 +21,15 @@ int num_v = 0;//number of vertex
 double rotate_y = 0;
 double rotate_x = 0;
 
+float cent_x = 0.0, cent_y = 0.0, cent_z = 0.0; //center of bounding box
+float box_size_x = 100.0, box_size_y = 100.0, box_size_z = 100.0;//bounding box size
+
 ////////////////////////////////////////
 // Name space
 ////////////////////////////////////////
 using namespace std;
 using std::string;
 using jsoncons::json;
-//using jsoncons::output_format;
-//using jsoncons::pretty_print;
 
 ////////////////////////////////////////
 // Function 
@@ -41,6 +43,36 @@ void InitialCube(void);
 void Loadmodel(void);
 void Draw_axes(void);
 void Draw_model(void);
+void perspectiveDrawCoordinateReference(void);
+
+
+extern struct Rect perspectiveRect;
+#define COORD_X_COLOR				255,0,0
+#define COORD_Y_COLOR				0,200,0
+#define COORD_Z_COLOR				20,20,255
+#define VIEW_COORD_REF_LEN	60		// top, front, right views (but perspective view)
+#define COORD_REF_LINE_WIDTH		3.0f
+
+void mouse(int button, int state, int x, int y)
+{
+	tbMouse(button, state, x, y);
+}
+void motion(int x, int y)
+{
+	tbMotion(x, y);
+}
+void mousewheel(int wheel, int direction, int x, int y)
+{
+	mouse(GLUT_MIDDLE_BUTTON, GLUT_DOWN, x, y);
+	motion(x + 3.0f*direction, y);
+}
+void timf( int value)
+{
+	glutPostRedisplay();
+	glutTimerFunc(1, timf, 0);
+}
+
+
 ////////////////////////////////////////
 // Main function
 ////////////////////////////////////////
@@ -59,7 +91,14 @@ int main(int argc, char* argv[])
 	//Register function call
 	glutDisplayFunc(Render_Scene);
 	glutReshapeFunc(Reshape);
-	glutSpecialFunc(specialKeys);
+
+//	glutSpecialFunc(specialKeys);
+	glutMouseFunc(mouse);
+	glutMotionFunc(motion);
+	glutMouseWheelFunc(mousewheel);
+	tbInit(GLUT_LEFT_BUTTON);
+	tbAnimate(GL_TRUE);
+	glutTimerFunc(40, timf, 0);
 
 	//Send to GLUT main loops
 	glutMainLoop();
@@ -71,14 +110,19 @@ void Initial_Scene(void){
 	// 1.background color
 	glClearColor(0.75f, 0.75f, 0.75f, 0.75f);
 
-	// 2.camera
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(150.0f, 150.0f, 150.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-
 	// 3.load model
 	//InitialCube();
 	Loadmodel();
+
+	// 2.camera
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+//	gluLookAt(150.0f, 150.0f, 150.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	gluLookAt(0.0f, 0.0f, box_size_x*2.4f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	glTranslatef(-cent_x, -cent_y, -cent_z);
+
+
 }
 
 void Render_Scene(void){
@@ -89,23 +133,42 @@ void Render_Scene(void){
 	glMatrixMode(GL_MODELVIEW);
 //	glLoadIdentity();
 	glPushMatrix();
-	glRotatef(rotate_x, 1.0f, 0.0f, 0.0f);
-	glRotatef(rotate_y, 0.0f, 1.0f, 0.0f);
+
+	glTranslatef(cent_x, cent_y, cent_z);
+	tbMatrix();
+	glTranslatef(-cent_x, -cent_y, -cent_z);
+
+//	glRotatef(rotate_x, 1.0f, 0.0f, 0.0f);
+//	glRotatef(rotate_y, 0.0f, 1.0f, 0.0f);
 
 	// 2.Draw everything
 	Draw_axes();
 	Draw_model();
+
+	perspectiveDrawCoordinateReference();
+
 	glPopMatrix();
+
+
 	// 3.Swap buffers
 	glutSwapBuffers();
 }
 
 void Reshape(int width, int high){
+	tbReshape(width, high);
+
 	glViewport(0, 0, width, high);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(75, float(width) / high, 0.1f, 1000);
+	gluPerspective(45, float(width) / high, 0.1f, 1000);
+
+	perspectiveRect.x1 = 0;
+	perspectiveRect.x2 = width;
+	perspectiveRect.y1 = 0;
+	perspectiveRect.y2 = high;
+	perspectiveRect.w = width;
+
 }
 
 void specialKeys(int key, int x, int y){
@@ -175,6 +238,16 @@ void Loadmodel(void){
 	vector<double> vox_size = obj["Voxelscale"].as<std::vector<double>>();
 	int vox_num = obj["Numofvoxel"].as<int>();
 
+	//compute bounding box
+	vector<int> model_scale = obj["Modelscale"].as<std::vector<int>>();
+	box_size_x = model_scale[0] * vox_size[0];//32*4.92
+	box_size_y = model_scale[1] * vox_size[1];//32*4.92
+	box_size_z = model_scale[2] * vox_size[2];//32*4.92
+	cent_x = box_size_x / 2.0;
+	cent_y = box_size_y / 2.0;
+	cent_z = box_size_z / 2.0;
+
+
 	// for each voxels
 	for (int i = 0; i < vox_num; i++){
 	//int i = 0;
@@ -237,16 +310,22 @@ void Draw_axes(void){
 	glBegin(GL_LINES);
 	// x-axis :red
 	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(150.0f, 0.0f, 0.0f);
+//	glVertex3f(0.0f, 0.0f, 0.0f);
+//	glVertex3f(150.0f, 0.0f, 0.0f);
+	glVertex3f(cent_x, cent_y, cent_z);
+	glVertex3f(cent_x + 200.0f, cent_y, cent_z);
 	// y-axis :green
 	glColor3f(0.0f, 1.0f, 0.0f);
-	glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 150.0f, 0.0f);
+	/*glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 150.0f, 0.0f);*/
+	glVertex3f(cent_x, cent_y, cent_z);
+	glVertex3f(cent_x, cent_y + 200.0f, cent_z);
 	// z-axis :blue
 	glColor3f(0.0f, 0.0f, 1.0f);
-	glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 0.0f, 150.0f);
+	/*glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 150.0f);*/
+	glVertex3f(cent_x, cent_y, cent_z);
+	glVertex3f(cent_x, cent_y, cent_z + 200.0f);
 	glEnd();
 }
 
@@ -265,4 +344,101 @@ void Draw_model(void){
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_BACK);
+}
+
+#define COORDINATE_LENGTH 0.2f
+#define UNPROJECT_DEPTH 0.6
+void perspectiveDrawCoordinateReference(void)
+{
+	GLdouble x_axis[3], y_axis[3], z_axis[3], reference[3];
+	GLdouble mv[16], p[16];
+	GLint vp[4];
+
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+
+	GLdouble zoom = tb_getScale();
+	glScaled(1.0 / zoom, 1.0 / zoom, 1.0 / zoom);
+
+
+	glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+	glGetDoublev(GL_PROJECTION_MATRIX, p);
+	glGetIntegerv(GL_VIEWPORT, vp);
+
+	// use view center to unproject
+	GLfloat viewportCenter[2];
+	viewportCenter[0] = perspectiveRect.w / 2.0;
+	viewportCenter[1] = perspectiveRect.h / 2.0;
+	gluUnProject(viewportCenter[0], viewportCenter[1], UNPROJECT_DEPTH, mv, p, vp,
+		&reference[0], &reference[1], &reference[2]);
+	gluProject(reference[0] + COORDINATE_LENGTH, reference[1], reference[2], mv, p, vp, &x_axis[0], &x_axis[1], &x_axis[2]);
+	gluProject(reference[0], reference[1] + COORDINATE_LENGTH, reference[2], mv, p, vp, &y_axis[0], &y_axis[1], &y_axis[2]);
+	gluProject(reference[0], reference[1], reference[2] + COORDINATE_LENGTH, mv, p, vp, &z_axis[0], &z_axis[1], &z_axis[2]);
+
+
+	GLdouble coordRefOffset;	// coordinate reference offset
+	coordRefOffset = 0.1* glutGet(GLUT_WINDOW_HEIGHT);
+
+
+	gluUnProject(coordRefOffset + (x_axis[0] - viewportCenter[0]), coordRefOffset + (x_axis[1] - viewportCenter[1]), UNPROJECT_DEPTH,
+		mv, p, vp, &x_axis[0], &x_axis[1], &x_axis[2]);
+	gluUnProject(coordRefOffset + (y_axis[0] - viewportCenter[0]), coordRefOffset + (y_axis[1] - viewportCenter[1]), UNPROJECT_DEPTH,
+		mv, p, vp, &y_axis[0], &y_axis[1], &y_axis[2]);
+	gluUnProject(coordRefOffset + (z_axis[0] - viewportCenter[0]), coordRefOffset + (z_axis[1] - viewportCenter[1]), UNPROJECT_DEPTH,
+		mv, p, vp, &z_axis[0], &z_axis[1], &z_axis[2]);
+
+	gluUnProject(coordRefOffset, coordRefOffset, UNPROJECT_DEPTH, mv, p, vp, &reference[0], &reference[1], &reference[2]);
+
+
+
+	glLineWidth(1.0f);
+	glBegin(GL_LINES);
+
+	glColor3ub(COORD_X_COLOR);
+	glVertex3dv(reference);//origin);
+	glVertex3dv(x_axis);
+
+	glColor3ub(COORD_Y_COLOR);
+	glVertex3dv(reference);//origin);
+	glVertex3dv(y_axis);
+
+	glColor3ub(COORD_Z_COLOR);
+	glVertex3dv(reference);//origin);
+	glVertex3dv(z_axis);
+
+	glEnd();
+
+	glScaled(zoom, zoom, zoom);
+
+	glPopMatrix();
+
+	// draw center coordinate reference
+	//	glMatrixMode(GL_MODELVIEW);
+	//	glPushMatrix();
+	//	glTranslatef(x, y , z);
+	//	glEnable(GL_SMOOTH);
+/*
+	glEnable(GL_LINE_SMOOTH);
+	glLineWidth(COORD_REF_LINE_WIDTH*0.7);
+	glBegin(GL_LINES);
+
+	glColor3ub(COORD_X_COLOR);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(VIEW_COORD_REF_LEN, 0.0f, 0.0f);
+
+	glColor3ub(COORD_Y_COLOR);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, VIEW_COORD_REF_LEN, 0.0f);
+
+	glColor3ub(COORD_Z_COLOR);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, VIEW_COORD_REF_LEN);
+
+	glEnd();
+
+	glDisable(GL_LINE_SMOOTH);
+*/	//	glPopMatrix();
+
+	//	glDisable(GL_SMOOTH);
 }

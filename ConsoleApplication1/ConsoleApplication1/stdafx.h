@@ -10,6 +10,11 @@
 #include <stdio.h>
 #include <tchar.h>
 
+struct Rect {
+	int x1, y1, x2, y2, w, h;
+	// w = x2 - x1,   h = y2 - y1;
+};
+
 
 
 // TODO:  在此參考您的程式所需要的其他標頭
