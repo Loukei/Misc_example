@@ -18,9 +18,6 @@ std::vector<GLubyte> color_list;
 std::vector<GLuint> index_list;
 int num_v = 0;//number of vertex
 
-double rotate_y = 0;
-double rotate_x = 0;
-
 float cent_x = 0.0, cent_y = 0.0, cent_z = 0.0; //center of bounding box
 float box_size_x = 100.0, box_size_y = 100.0, box_size_z = 100.0;//bounding box size
 
@@ -37,7 +34,6 @@ using jsoncons::json;
 void Initial_Scene(void);
 void Render_Scene(void);
 void Reshape(int width, int high);
-void specialKeys(int key, int x, int y);
 
 void InitialCube(void);
 void Loadmodel(void);
@@ -92,7 +88,6 @@ int main(int argc, char* argv[])
 	glutDisplayFunc(Render_Scene);
 	glutReshapeFunc(Reshape);
 
-//	glutSpecialFunc(specialKeys);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 	glutMouseWheelFunc(mousewheel);
@@ -110,19 +105,17 @@ void Initial_Scene(void){
 	// 1.background color
 	glClearColor(0.75f, 0.75f, 0.75f, 0.75f);
 
-	// 3.load model
-	//InitialCube();
+	// 2.load model
+	//InitialCube(); //a sample cube for debug
 	Loadmodel();
 
-	// 2.camera
+	// 3.camera
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 //	gluLookAt(150.0f, 150.0f, 150.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 	gluLookAt(0.0f, 0.0f, box_size_x*2.4f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 	glTranslatef(-cent_x, -cent_y, -cent_z);
-
-
 }
 
 void Render_Scene(void){
@@ -137,9 +130,6 @@ void Render_Scene(void){
 	glTranslatef(cent_x, cent_y, cent_z);
 	tbMatrix();
 	glTranslatef(-cent_x, -cent_y, -cent_z);
-
-//	glRotatef(rotate_x, 1.0f, 0.0f, 0.0f);
-//	glRotatef(rotate_y, 0.0f, 1.0f, 0.0f);
 
 	// 2.Draw everything
 	Draw_axes();
@@ -161,33 +151,15 @@ void Reshape(int width, int high){
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45, float(width) / high, 0.1f, 1000);
+//	gluPerspective(45, float(width) / high, 0.1f, 1000);
+	gluPerspective(45, float(width) / high, box_size_x*0.1f, box_size_x*10.0f);
 
 	perspectiveRect.x1 = 0;
 	perspectiveRect.x2 = width;
 	perspectiveRect.y1 = 0;
 	perspectiveRect.y2 = high;
 	perspectiveRect.w = width;
-
-}
-
-void specialKeys(int key, int x, int y){
-	//  Right arrow - increase rotation by 5 degree
-	if (key == GLUT_KEY_RIGHT)
-		rotate_y += 5;
-
-	//  Left arrow - decrease rotation by 5 degree
-	else if (key == GLUT_KEY_LEFT)
-		rotate_y -= 5;
-
-	else if (key == GLUT_KEY_UP)
-		rotate_x += 5;
-
-	else if (key == GLUT_KEY_DOWN)
-		rotate_x -= 5;
-
-	//  Request display update
-	glutPostRedisplay();
+	perspectiveRect.h = high;
 }
 
 void InitialCube(void){
@@ -310,20 +282,14 @@ void Draw_axes(void){
 	glBegin(GL_LINES);
 	// x-axis :red
 	glColor3f(1.0f, 0.0f, 0.0f);
-//	glVertex3f(0.0f, 0.0f, 0.0f);
-//	glVertex3f(150.0f, 0.0f, 0.0f);
 	glVertex3f(cent_x, cent_y, cent_z);
 	glVertex3f(cent_x + 200.0f, cent_y, cent_z);
 	// y-axis :green
 	glColor3f(0.0f, 1.0f, 0.0f);
-	/*glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 150.0f, 0.0f);*/
 	glVertex3f(cent_x, cent_y, cent_z);
 	glVertex3f(cent_x, cent_y + 200.0f, cent_z);
 	// z-axis :blue
 	glColor3f(0.0f, 0.0f, 1.0f);
-	/*glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 0.0f, 150.0f);*/
 	glVertex3f(cent_x, cent_y, cent_z);
 	glVertex3f(cent_x, cent_y, cent_z + 200.0f);
 	glEnd();
@@ -346,7 +312,7 @@ void Draw_model(void){
 	glDisable(GL_BACK);
 }
 
-#define COORDINATE_LENGTH 0.2f
+#define COORDINATE_LENGTH 2.5f
 #define UNPROJECT_DEPTH 0.6
 void perspectiveDrawCoordinateReference(void)
 {
